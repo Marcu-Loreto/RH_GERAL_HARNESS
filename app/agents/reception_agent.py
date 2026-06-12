@@ -7,15 +7,17 @@ acolhedora e orienta o usuário — sem acionar retrieval, modelo ou revisão hu
 
 Perguntas reais de RH (que contêm sinal de domínio) **não** são interceptadas:
 seguem para o orquestrador e os agentes especialistas. A mensagem de boas-vindas
-vem de ``prompts/agents/reception_agent.md`` (manutenção sem tocar no código).
+é uma frase curta e dedicada (constante ``_DEFAULT_WELCOME``) — o corpo do prompt
+comportamental em ``prompts/agents/reception_agent.md`` é especificação interna e
+**nunca** deve ser devolvido ao usuário.
 """
 
 from __future__ import annotations
 
 import re
 
-from app.agents.agent_prompts import get_agent_scope
 from app.agents.query_intelligence import has_domain_keywords
+from app.core.clock import greeting_for
 from app.core.logging import get_logger
 from app.core.models import Answer, Confidence
 
@@ -73,13 +75,23 @@ _HELP_TERMS: tuple[str, ...] = (
     "no que pode ajudar",
 )
 
-_DEFAULT_WELCOME = (
-    "Olá! Sou o assistente virtual de RH. Posso ajudar com dúvidas sobre "
+# Corpo da mensagem de boas-vindas (sem a saudação inicial). A saudação —
+# "Bom dia/Boa tarde/Boa noite" — é prefixada dinamicamente conforme o horário
+# de São Paulo (ver ``_build_welcome``).
+_WELCOME_BODY = (
+    "Sou o assistente virtual de RH. Posso ajudar com dúvidas sobre "
     "benefícios, trabalhista e políticas internas, cargos e salários, "
     "treinamento, recrutamento e compliance. Sobre o que você gostaria de saber?"
 )
+# Fallback estático (usado quando não há instante de referência disponível).
+_DEFAULT_WELCOME = f"Olá! {_WELCOME_BODY}"
 _THANKS_MESSAGE = "De nada! Posso ajudar com mais alguma dúvida de RH?"
 _FAREWELL_MESSAGE = "Até logo! Se precisar de algo sobre RH, é só voltar."
+
+
+def _build_welcome() -> str:
+    """Monta a saudação de boas-vindas sensível ao horário de São Paulo."""
+    return f"{greeting_for()}! {_WELCOME_BODY}"
 
 
 def _matches_any(text: str, terms: tuple[str, ...]) -> bool:
@@ -99,8 +111,17 @@ class ReceptionAgent:
     def __init__(self) -> None:
         self.name = RECEPTION_AGENT_NAME
         self.agent_id = RECEPTION_AGENT_ID
-        # Mensagem de boas-vindas/orientação carregada do arquivo de prompt.
-        self._welcome = get_agent_scope(self.agent_id, default=_DEFAULT_WELCOME)
+
+    @property
+    def _welcome(self) -> str:
+        """Mensagem de boas-vindas exibida ao usuário.
+
+        É uma frase curta e dedicada, com saudação sensível ao horário de São
+        Paulo — NUNCA o corpo do prompt comportamental do agente
+        (``prompts/agents/reception_agent.md``), que é especificação interna e
+        não deve ser exposta ao usuário.
+        """
+        return _build_welcome()
 
     def detect_intent(self, text: str) -> str | None:
         """Classifica a intenção social da mensagem, ou ``None`` se não for recepção.
