@@ -12,7 +12,7 @@ from __future__ import annotations
 from typing import Protocol
 
 from app.core.models import Answer, Confidence, Evidence
-from app.guardrails.policies import NO_EVIDENCE_RESPONSE
+from app.guardrails.policies import no_evidence_response
 from app.retrieval.vector_store import ScoredChunk
 
 
@@ -42,7 +42,7 @@ class ExtractiveAnswerGenerator:
     def generate(self, query: str, chunks: list[ScoredChunk]) -> Answer:
         if not chunks:
             return Answer(
-                answer=NO_EVIDENCE_RESPONSE,
+                answer=no_evidence_response(),
                 evidence=[],
                 confidence=Confidence.BAIXA,
                 limitations="Nenhum documento aprovado e vigente foi encontrado para a consulta.",

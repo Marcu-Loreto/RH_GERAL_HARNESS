@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 from app.core.config import get_settings
 from app.core.logging import get_logger
 from app.core.models import Answer, Confidence, Evidence
-from app.guardrails.policies import NO_EVIDENCE_RESPONSE
+from app.guardrails.policies import no_evidence_response
 from app.retrieval.vector_store import ScoredChunk
 
 if TYPE_CHECKING:
@@ -67,9 +67,7 @@ def _build_context(chunks: list[ScoredChunk]) -> str:
     context_parts = []
     for item in chunks:
         chunk = item.chunk
-        context_parts.append(
-            f"[{chunk.title} v{chunk.version}]\n{chunk.text}\n"
-        )
+        context_parts.append(f"[{chunk.title} v{chunk.version}]\n{chunk.text}\n")
     return "\n---\n".join(context_parts)
 
 
@@ -94,11 +92,13 @@ class LLMAnswerGenerator:
         settings = get_settings()
         self._temperature = temperature or settings.model_temperature
 
-    def generate(self, query: str, chunks: list[ScoredChunk], model_name: str | None = None) -> Answer:
+    def generate(
+        self, query: str, chunks: list[ScoredChunk], model_name: str | None = None
+    ) -> Answer:
         """Gera uma resposta fundamentada usando LLM."""
         if not chunks:
             return Answer(
-                answer=NO_EVIDENCE_RESPONSE,
+                answer=no_evidence_response(),
                 evidence=[],
                 confidence=Confidence.BAIXA,
                 limitations="Nenhum documento aprovado e vigente foi encontrado para a consulta.",
@@ -126,7 +126,7 @@ class LLMAnswerGenerator:
 
             # Limita o tamanho da resposta
             if len(answer_text) > self._max_excerpt_chars:
-                answer_text = answer_text[:self._max_excerpt_chars].rstrip() + "..."
+                answer_text = answer_text[: self._max_excerpt_chars].rstrip() + "..."
 
         except Exception as e:
             logger.error("llm_generation_error", error=str(e))

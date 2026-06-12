@@ -7,8 +7,8 @@ import pytest
 from app.core.models import UserRole
 from app.guardrails.policies import (
     FORBIDDEN_REQUEST_RESPONSE,
-    NO_EVIDENCE_RESPONSE,
     BlockReason,
+    no_evidence_response,
 )
 from app.rag.pipeline import RagPipeline
 
@@ -33,7 +33,7 @@ def test_input_guardrail_blocks_injection(pipeline: RagPipeline) -> None:
 @pytest.mark.integration
 def test_no_evidence_returns_limitation(pipeline: RagPipeline) -> None:
     result = pipeline.run("qual a política de viagem interplanetária?", area_rh="politicas")
-    assert result.answer.answer == NO_EVIDENCE_RESPONSE
+    assert result.answer.answer == no_evidence_response()
     assert result.answer.requires_human_review is True
 
 

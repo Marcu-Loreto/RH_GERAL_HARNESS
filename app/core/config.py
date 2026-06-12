@@ -77,6 +77,9 @@ class Settings(BaseSettings):
     prompt_registry_dir: str = "prompts"
     # Confiança de roteamento abaixo da qual a resposta é escalada (RF3.6).
     human_review_min_confidence: float = 0.34
+    # URL do portal de chamados do RH — usada no fallback quando não há resposta
+    # na base ou quando o usuário precisa de atendimento humano/dado restrito.
+    support_ticket_url: str = "https://jira.cpqd.com.br/servicedesk/customer/portal/27"
 
     # ── Configurações de Modelo LLM ──────────────────────────────────────────
     # Modelos por nível de dificuldade (configuráveis via .env)

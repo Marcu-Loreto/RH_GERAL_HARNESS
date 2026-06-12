@@ -8,7 +8,7 @@ import pytest
 
 from app.agents.answer_generator import ExtractiveAnswerGenerator
 from app.core.models import ChunkMetadata, Confidentiality, DocumentStatus
-from app.guardrails.policies import NO_EVIDENCE_RESPONSE
+from app.guardrails.policies import no_evidence_response
 from app.retrieval.vector_store import ScoredChunk
 
 
@@ -42,7 +42,7 @@ def test_generates_answer_with_evidence() -> None:
 def test_no_chunks_returns_no_evidence_message() -> None:
     gen = ExtractiveAnswerGenerator()
     answer = gen.generate("qualquer", [])
-    assert answer.answer == NO_EVIDENCE_RESPONSE
+    assert answer.answer == no_evidence_response()
     assert answer.evidence == []
 
 

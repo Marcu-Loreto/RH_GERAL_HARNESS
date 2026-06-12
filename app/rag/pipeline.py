@@ -28,7 +28,12 @@ from app.governance.policy_registry import PolicyRegistry, get_policy_registry
 from app.guardrails.input_guardrail import check_input
 from app.guardrails.output_guardrail import check_output
 from app.guardrails.pii import detect_pii
-from app.guardrails.policies import FORBIDDEN_REQUEST_RESPONSE, NO_EVIDENCE_RESPONSE, BlockReason
+from app.guardrails.policies import (
+    FORBIDDEN_REQUEST_RESPONSE,
+    BlockReason,
+    no_evidence_response,
+    restricted_data_response,
+)
 from app.observability.sinks import TraceSink, get_trace_sink
 from app.observability.trace import build_answer_trace, estimate_tokens, record_trace
 from app.retrieval.embeddings import EmbeddingProvider, get_embedding_provider
@@ -145,8 +150,19 @@ class RagPipeline:
             self._sink.event(
                 "guardrail_triggered", trace_id=trace_id, stage="input", reasons=triggered
             )
+            # Diferencia recusa de segurança (injeção/entrada inválida — sem
+            # incentivo a chamado) de pedido legítimo porém restrito (dado
+            # pessoal — encaminha ao RH/chamado).
+            security_block = {
+                BlockReason.PROMPT_INJECTION,
+                BlockReason.INVALID_INPUT,
+            }
+            if security_block.intersection(input_check.reasons):
+                blocked_message = FORBIDDEN_REQUEST_RESPONSE
+            else:
+                blocked_message = restricted_data_response()
             answer = Answer(
-                answer=FORBIDDEN_REQUEST_RESPONSE,
+                answer=blocked_message,
                 evidence=[],
                 confidence=Confidence.BAIXA,
                 limitations="Solicitação bloqueada pelo guardrail de entrada.",
@@ -238,7 +254,7 @@ class RagPipeline:
             )
             triggered.append(BlockReason.PII_REQUEST.value)
             answer = Answer(
-                answer=FORBIDDEN_REQUEST_RESPONSE,
+                answer=restricted_data_response(),
                 evidence=[],
                 confidence=Confidence.BAIXA,
                 limitations="Solicitação bloqueada pela triagem do agente especialista.",
@@ -344,7 +360,7 @@ class RagPipeline:
                     "guardrail_triggered", trace_id=trace_id, stage="output", reasons=triggered
                 )
                 answer = Answer(
-                    answer=NO_EVIDENCE_RESPONSE,
+                    answer=no_evidence_response(),
                     evidence=[],
                     confidence=Confidence.BAIXA,
                     limitations="Resposta reprovada pelo guardrail de saída (sem fonte/evidência).",
@@ -423,7 +439,7 @@ class RagPipeline:
     def _estimate_output_tokens(self, chunks: list[ScoredChunk]) -> int:
         """Estima tokens de saída do gerador extrativo (para custo/orçamento)."""
         if not chunks:
-            return estimate_tokens(NO_EVIDENCE_RESPONSE)
+            return estimate_tokens(no_evidence_response())
         total = 10
         for item in chunks:
             total += min(len(item.chunk.text.split()), 55)
