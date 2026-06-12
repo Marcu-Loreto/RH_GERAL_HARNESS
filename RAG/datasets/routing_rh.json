@@ -1,0 +1,65 @@
+[
+  {
+    "id": "r-001",
+    "question": "Quantos dias de férias eu tenho direito?",
+    "expected_domain": "beneficios",
+    "expected_agent": "agente_beneficios",
+    "expect_fallback": false
+  },
+  {
+    "id": "r-002",
+    "question": "Como funciona o vale-alimentação?",
+    "expected_domain": "beneficios",
+    "expected_agent": "agente_beneficios",
+    "expect_fallback": false
+  },
+  {
+    "id": "r-003",
+    "question": "Qual o prazo do banco de horas e da jornada?",
+    "expected_domain": "trabalhista",
+    "expected_agent": "agente_trabalhista",
+    "expect_fallback": false
+  },
+  {
+    "id": "r-004",
+    "question": "Posso trabalhar em home office remoto?",
+    "expected_domain": "trabalhista",
+    "expected_agent": "agente_trabalhista",
+    "expect_fallback": false
+  },
+  {
+    "id": "r-005",
+    "question": "Como funciona a promoção e a faixa salarial do meu cargo?",
+    "expected_domain": "cargos_salarios",
+    "expected_agent": "agente_cargos_salarios",
+    "expect_fallback": false
+  },
+  {
+    "id": "r-006",
+    "question": "Tem reembolso de curso e certificação no programa de treinamento?",
+    "expected_domain": "treinamento",
+    "expected_agent": "agente_treinamento",
+    "expect_fallback": false
+  },
+  {
+    "id": "r-007",
+    "question": "Como funciona o processo seletivo e a indicação para uma vaga?",
+    "expected_domain": "recrutamento",
+    "expected_agent": "agente_recrutamento",
+    "expect_fallback": false
+  },
+  {
+    "id": "r-008",
+    "question": "Como faço uma denúncia de assédio no canal de ética?",
+    "expected_domain": "compliance",
+    "expected_agent": "agente_compliance",
+    "expect_fallback": false
+  },
+  {
+    "id": "r-009",
+    "question": "Bom dia, tudo bem com você hoje?",
+    "expected_domain": null,
+    "expected_agent": null,
+    "expect_fallback": true
+  }
+]

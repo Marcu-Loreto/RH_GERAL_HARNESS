@@ -1,0 +1,15 @@
+# Dependências de desenvolvimento (testes, lint, formatação, type-check).
+# Espelham [project.optional-dependencies.dev] do pyproject.toml.
+# Inclui as dependências de runtime.
+#
+# Instalação:
+#     pip install -r requirements-dev.txt
+
+-r requirements.txt
+
+pytest>=8.3.0       # validado: 9.0.3
+pytest-cov>=6.0.0   # validado: 7.1.0
+httpx>=0.27.0       # validado: 0.28.1
+black>=24.10.0      # validado: 26.5.1
+ruff>=0.7.0         # validado: 0.15.16
+mypy>=1.13.0        # validado: 2.1.0
